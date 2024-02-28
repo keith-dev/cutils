@@ -15,22 +15,15 @@
 	Raziel: https://codereview.stackexchange.com/users/172927/raziel
  */
 
-#ifndef S22H_UNICODE_H_
-#define S22H_UNICODE_H_
+#pragma once
 
-#include <stdlib.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 
-static const uint32_t UTF8_ONE_BYTE_MASK = 0x80;
-static const uint32_t UTF8_ONE_BYTE_BITS = 0;
-static const uint32_t UTF8_TWO_BYTES_MASK = 0xE0;
-static const uint32_t UTF8_TWO_BYTES_BITS = 0xC0;
-static const uint32_t UTF8_THREE_BYTES_MASK = 0xF0;
-static const uint32_t UTF8_THREE_BYTES_BITS = 0xE0;
-static const uint32_t UTF8_FOUR_BYTES_MASK = 0xF8;
-static const uint32_t UTF8_FOUR_BYTES_BITS = 0xF0;
-static const uint32_t UTF8_CONTINUATION_MASK = 0xC0;
-static const uint32_t UTF8_CONTINUATION_BITS = 0x80;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
 	@brief Finds the codepoint size of a given starting UTF8 byte.
@@ -94,5 +87,6 @@ size_t utf32_strlen(const uint32_t* text, size_t* valid_bytes);
 */
 size_t utf8_to_utf32(const uint8_t* text, uint32_t* buffer, size_t buffer_size);
 
+#ifdef __cplusplus
+}
 #endif
-

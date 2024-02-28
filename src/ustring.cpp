@@ -9,57 +9,52 @@
 #include "ustring.h"
 #include "unicode.h"
 
-#include <cstring>
-
-ustring::ustring() {
-	buffer = nullptr;
-	size = 0;
-	length = 0;
-}
+namespace s22h::cutils {
 
 ustring::ustring(const char *chars) {
-	length = utf8_strlen((uint8_t*) chars, &size);
-	buffer = new uint8_t[size + 1];
-	buffer[size] = 0;
-	memcpy(buffer, chars, size);
-}
-
-ustring::ustring(ustring& other) {
-	size = other.size;
-	length = other.length;
-	buffer = new uint8_t[size + 1];
-	buffer[size] = 0;
-	memcpy(buffer, other.buffer, size);
-}
-
-ustring::~ustring() {
-	if (buffer) {
-		delete[] buffer;
-		length = 0;
-		size = 0;
-	}
+	length_ = utf8_strlen((uint8_t*) chars, &size_);
+	buffer_ = std::make_shared<uint8_t>(size_ + 1);
+	buffer_.get()[size_] = 0;
+	memcpy(buffer_.get(), chars, size_);
 }
 
 ustring& ustring::operator=(const char *chars) {
-	if (buffer) delete[] buffer;
-
-	length = utf8_strlen((uint8_t*) chars, &size);
-	buffer = new uint8_t[size + 1];
-	buffer[size] = 0;
-	memcpy(buffer, chars, size);
+	length_ = utf8_strlen((uint8_t*) chars, &size_);
+	buffer_ = std::make_shared<uint8_t>(size_ + 1);
+	buffer_.get()[size_] = 0;
+	memcpy(buffer_.get(), chars, size_);
 
 	return *this;
 }
 
-ustring& ustring::operator=(ustring& other) {
-	if (buffer) delete[] buffer;
+ustring::ustring(ustring&& other) {
+	length_ = other.length_;
+	size_ = other.size_;
+	buffer_ = other.buffer_;
 
-	size = other.size;
-	length = other.length;
-	buffer = new uint8_t[size + 1];
-	buffer[size] = 0;
-	memcpy(buffer, other.buffer, size);
+	other.length_ = other.size_ = 0;
+	other.buffer_.reset();
+}
+
+ustring& ustring::operator=(ustring&& other) {
+	if (this != &other) {
+		length_ = other.length_;
+		size_ = other.size_;
+		buffer_ = std::make_shared<uint8_t>(size_ + 1);
+
+		other.length_ = other.size_ = 0;
+		other.buffer_.reset();
+	}
 
 	return *this;
 }
 
+bool ustring::operator==(const ustring& other) const {
+	return
+		length_ == other.length_ &&
+		size_ == other.size_ &&
+		((buffer_.get() && other.buffer_.get() && memcmp(buffer_.get(), other.buffer_.get(), size_) == 0) ||
+		 (!buffer_.get() && !other.buffer_.get()));
+}
+
+}  // namespace s22h::cutils

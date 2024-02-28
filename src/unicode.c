@@ -9,6 +9,17 @@
 
 #include <stdio.h>
 
+static const uint32_t UTF8_ONE_BYTE_MASK = 0x80;
+static const uint32_t UTF8_ONE_BYTE_BITS = 0;
+static const uint32_t UTF8_TWO_BYTES_MASK = 0xE0;
+static const uint32_t UTF8_TWO_BYTES_BITS = 0xC0;
+static const uint32_t UTF8_THREE_BYTES_MASK = 0xF0;
+static const uint32_t UTF8_THREE_BYTES_BITS = 0xE0;
+static const uint32_t UTF8_FOUR_BYTES_MASK = 0xF8;
+static const uint32_t UTF8_FOUR_BYTES_BITS = 0xF0;
+static const uint32_t UTF8_CONTINUATION_MASK = 0xC0;
+static const uint32_t UTF8_CONTINUATION_BITS = 0x80;
+
 size_t utf8_codepoint_size(const uint8_t byte) {
 	if ((byte & UTF8_ONE_BYTE_MASK) == UTF8_ONE_BYTE_BITS) {
 		return 1;
@@ -51,7 +62,7 @@ size_t utf8_strnlen(const uint8_t* text, size_t* valid_bytes, size_t max_bytes) 
 		}
 
 		if (cp_size > 1) {
-			for (unsigned int n = 1; n < cp_size; n++) {
+			for (unsigned int n = 1; n < cp_size; ++n) {
 				if (text[i + n] == 0) {
 					// String is NUL-terminated in the middle of the codepoint
 					fprintf(stderr, "utf8_strnlen: string is NUL-terminated in the middle of a codepoint.\n");
@@ -71,7 +82,7 @@ size_t utf8_strnlen(const uint8_t* text, size_t* valid_bytes, size_t max_bytes) 
 		}
 
 		i += cp_size;
-		num_chars++;
+		++num_chars;
 
 		if (max_bytes > 0 && i > max_bytes) {
 			// Next codepoint would be out of bounds
@@ -123,7 +134,7 @@ size_t utf8_to_utf32(const uint8_t* text, uint32_t* buffer, size_t buffer_size) 
 		return 0;
 	}
 
-	for (size_t n = 0; n < num_chars; n++) {
+	for (size_t n = 0; n < num_chars; ++n) {
 		cp_size = utf8_codepoint_size(text[i]);
 
 		switch (cp_size) {
@@ -164,4 +175,3 @@ size_t utf8_to_utf32(const uint8_t* text, uint32_t* buffer, size_t buffer_size) 
 	buffer[num_chars] = '\0';
 	return num_chars;
 }
-
